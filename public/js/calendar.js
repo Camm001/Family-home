@@ -5,12 +5,14 @@ PAGE_RENDERERS.calendar = async function () {
   content.innerHTML = `
     <div class="section-header">
       <h2>Calendar</h2>
+      <button class="btn btn-ghost btn-sm" id="icloud-btn">☁ iCloud</button>
       <button class="btn btn-primary" id="add-event-btn">+ Add Event</button>
     </div>
     <div id="fc-container"></div>
   `;
 
   document.getElementById('add-event-btn').addEventListener('click', () => openEventModal());
+  document.getElementById('icloud-btn').addEventListener('click', openIcloudModal);
 
   if (fcInstance) { fcInstance.destroy(); fcInstance = null; }
 
@@ -93,6 +95,83 @@ function openEventModal(event = {}) {
       } catch (err) { App.toast(err.message, 'error'); }
     });
   });
+}
+
+async function openIcloudModal() {
+  let status = { connected: false };
+  try { status = await App.api('/integrations/status'); } catch {}
+
+  App.openModal(`
+    <div class="modal-header"><h3>☁ iCloud Calendar</h3></div>
+    <div class="modal-body" id="icloud-modal-body">
+      ${status.connected ? `
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
+          <span class="badge badge-green">Connected</span>
+          <span class="text-sm text-muted">${escHtml(status.username)}</span>
+        </div>
+        <p class="text-sm text-muted">Last synced: ${status.last_sync_at ? new Date(status.last_sync_at).toLocaleString() : 'Never'}</p>
+        <div style="display:flex;gap:.5rem;margin-top:1rem">
+          <button class="btn btn-primary btn-sm" id="icloud-sync-now-btn">Sync Now</button>
+          <button class="btn btn-danger btn-sm" id="icloud-disconnect-btn">Disconnect</button>
+        </div>
+      ` : `
+        <p class="text-sm text-muted" style="margin-bottom:1rem">Connect your iCloud calendar to see events here. You'll need an <strong>App-Specific Password</strong> — not your main Apple ID password.</p>
+        <label>Apple ID (email)</label>
+        <input type="email" id="icloud-username" placeholder="you@icloud.com">
+        <label style="margin-top:.75rem">App-Specific Password</label>
+        <input type="password" id="icloud-password" placeholder="xxxx-xxxx-xxxx-xxxx">
+        <p class="text-xs text-muted" style="margin-top:.375rem">
+          Generate one at <a href="https://appleid.apple.com/account/security" target="_blank" rel="noopener">appleid.apple.com</a> → App-Specific Passwords.
+        </p>
+      `}
+    </div>
+    <div class="modal-footer">
+      ${status.connected ? '' : '<button class="btn btn-primary" id="icloud-connect-btn">Connect</button>'}
+      <button class="btn btn-ghost modal-close">Cancel</button>
+    </div>
+  `);
+
+  if (status.connected) {
+    document.getElementById('icloud-sync-now-btn').addEventListener('click', async () => {
+      try {
+        const res = await App.api('/integrations/icloud/sync', { method: 'POST' });
+        App.toast(`Synced ${res.synced} new events`, 'success');
+        fcInstance?.refetchEvents();
+        App.closeModal();
+      } catch (e) { App.toast(e.message, 'error'); }
+    });
+
+    document.getElementById('icloud-disconnect-btn').addEventListener('click', async () => {
+      if (!confirm('Disconnect iCloud? This will remove imported events.')) return;
+      try {
+        await App.api('/integrations/icloud', { method: 'DELETE' });
+        App.toast('iCloud disconnected', 'success');
+        fcInstance?.refetchEvents();
+        App.closeModal();
+      } catch (e) { App.toast(e.message, 'error'); }
+    });
+  } else {
+    document.getElementById('icloud-connect-btn').addEventListener('click', async () => {
+      const username = document.getElementById('icloud-username').value.trim();
+      const app_password = document.getElementById('icloud-password').value.trim();
+      if (!username || !app_password) { App.toast('Both fields are required', 'error'); return; }
+
+      const btn = document.getElementById('icloud-connect-btn');
+      btn.disabled = true;
+      btn.textContent = 'Connecting…';
+
+      try {
+        await App.api('/integrations/icloud/connect', { method: 'POST', body: { username, app_password } });
+        App.toast('iCloud connected! Syncing events…', 'success');
+        fcInstance?.refetchEvents();
+        App.closeModal();
+      } catch (e) {
+        App.toast(e.message, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Connect';
+      }
+    });
+  }
 }
 
 // Simple page-scoped abort signal

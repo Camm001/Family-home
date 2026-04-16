@@ -19,6 +19,15 @@ db.pragma('foreign_keys = ON');
 const schema = fs.readFileSync(path.join(__dirname, 'db', 'schema.sql'), 'utf8');
 db.exec(schema);
 
+// Column migrations — safe to run on every boot (errors = column already exists)
+const migrations = [
+  'ALTER TABLE events ADD COLUMN ical_uid TEXT',
+  'ALTER TABLE events ADD COLUMN source TEXT DEFAULT \'local\'',
+];
+for (const sql of migrations) {
+  try { db.prepare(sql).run(); } catch { /* column already exists */ }
+}
+
 // Make db available to routes
 app.locals.db = db;
 
@@ -86,7 +95,8 @@ app.use('/api/pantry',    require('./routes/pantry'));
 app.use('/api/ai',        require('./routes/ai'));
 app.use('/api/webhooks',  require('./routes/webhooks'));
 app.use('/api/push',      require('./routes/push'));
-app.use('/api/users',     require('./routes/users'));
+app.use('/api/users',        require('./routes/users'));
+app.use('/api/integrations', require('./routes/integrations'));
 
 // SPA fallback
 app.get('*', (req, res) => {
@@ -97,6 +107,8 @@ app.get('*', (req, res) => {
 require('./services/digest');
 require('./services/reminders');
 require('./services/backup');
+const icloudSync = require('./services/icloud-sync');
+icloudSync._db = db;
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3085;

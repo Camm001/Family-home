@@ -5,11 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Family Hub</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#1e1b4b">
+  <meta name="theme-color" content="#ffffff">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <link rel="icon" href="/icons/icon-192.png">
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- FullCalendar -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
@@ -55,23 +60,25 @@
         <span class="sidebar-title">Family Hub</span>
         <button id="sidebar-close" class="sidebar-close">✕</button>
       </div>
-      <ul class="nav-list">
-        <li><a class="nav-item" data-page="dashboard" href="#dashboard"><span class="nav-icon">🏠</span><span>Dashboard</span></a></li>
-        <li><a class="nav-item" data-page="calendar" href="#calendar"><span class="nav-icon">📅</span><span>Calendar</span></a></li>
-        <li><a class="nav-item" data-page="shopping" href="#shopping"><span class="nav-icon">🛒</span><span>Shopping</span></a></li>
-        <li><a class="nav-item" data-page="chores" href="#chores"><span class="nav-icon">🧹</span><span>Chores</span></a></li>
-        <li><a class="nav-item" data-page="meals" href="#meals"><span class="nav-icon">🍽️</span><span>Meals</span></a></li>
-        <li><a class="nav-item" data-page="recipes" href="#recipes"><span class="nav-icon">📖</span><span>Recipes</span></a></li>
-        <li><a class="nav-item" data-page="photos" href="#photos"><span class="nav-icon">📸</span><span>Photos</span></a></li>
-        <li><a class="nav-item" data-page="board" href="#board"><span class="nav-icon">📌</span><span>Board</span></a></li>
-        <li><a class="nav-item" data-page="documents" href="#documents"><span class="nav-icon">📂</span><span>Documents</span></a></li>
-        <li><a class="nav-item" data-page="expenses" href="#expenses"><span class="nav-icon">💰</span><span>Expenses</span></a></li>
-        <li><a class="nav-item" data-page="watchlist" href="#watchlist"><span class="nav-icon">🎬</span><span>Watchlist</span></a></li>
-        <li><a class="nav-item" data-page="reminders" href="#reminders"><span class="nav-icon">🔔</span><span>Reminders</span></a></li>
-        <li><a class="nav-item" data-page="pantry" href="#pantry"><span class="nav-icon">🥫</span><span>Pantry</span></a></li>
-        <li><a class="nav-item" data-page="links" href="#links"><span class="nav-icon">🔗</span><span>Links</span></a></li>
+      <ul class="nav-list" id="nav-list">
+        <li><a class="nav-item" data-page="dashboard" href="#dashboard"><span class="nav-icon">🏠</span><span>Dashboard</span><span class="drag-handle">⠿</span></a></li>
+        <li><a class="nav-item" data-page="calendar" href="#calendar"><span class="nav-icon">📅</span><span>Calendar</span><span class="drag-handle">⠿</span></a></li>
+        <li><a class="nav-item" data-page="shopping" href="#shopping"><span class="nav-icon">🛒</span><span>Shopping</span><span class="drag-handle">⠿</span></a></li>
+        <li><a class="nav-item" data-page="chores" href="#chores"><span class="nav-icon">🧹</span><span>Chores</span><span class="drag-handle">⠿</span></a></li>
+        <li><a class="nav-item" data-page="meals" href="#meals"><span class="nav-icon">🍽️</span><span>Meals</span><span class="drag-handle">⠿</span></a></li>
+        <li><a class="nav-item" data-page="recipes" href="#recipes"><span class="nav-icon">📖</span><span>Recipes</span><span class="drag-handle">⠿</span></a></li>
+        <li><a class="nav-item" data-page="photos" href="#photos"><span class="nav-icon">📸</span><span>Photos</span><span class="drag-handle">⠿</span></a></li>
+        <li><a class="nav-item" data-page="board" href="#board"><span class="nav-icon">📌</span><span>Board</span><span class="drag-handle">⠿</span></a></li>
+        <li><a class="nav-item" data-page="documents" href="#documents"><span class="nav-icon">📂</span><span>Documents</span><span class="drag-handle">⠿</span></a></li>
+        <li><a class="nav-item" data-page="expenses" href="#expenses"><span class="nav-icon">💰</span><span>Expenses</span><span class="drag-handle">⠿</span></a></li>
+        <li><a class="nav-item" data-page="watchlist" href="#watchlist"><span class="nav-icon">🎬</span><span>Watchlist</span><span class="drag-handle">⠿</span></a></li>
+        <li><a class="nav-item" data-page="reminders" href="#reminders"><span class="nav-icon">🔔</span><span>Reminders</span><span class="drag-handle">⠿</span></a></li>
+        <li><a class="nav-item" data-page="pantry" href="#pantry"><span class="nav-icon">🥫</span><span>Pantry</span><span class="drag-handle">⠿</span></a></li>
+        <li><a class="nav-item" data-page="links" href="#links"><span class="nav-icon">🔗</span><span>Links</span><span class="drag-handle">⠿</span></a></li>
+        <li class="admin-only hidden"><a class="nav-item" data-page="admin" href="#admin"><span class="nav-icon">⚙️</span><span>Admin</span><span class="drag-handle">⠿</span></a></li>
       </ul>
       <div class="sidebar-footer">
+        <button id="reorder-toggle" class="reorder-toggle" title="Reorder tabs">⠿ Reorder</button>
         <button id="user-menu-btn" class="user-menu-btn">
           <span id="user-avatar" class="user-avatar">?</span>
           <span id="user-name-sidebar">Loading...</span>
@@ -96,20 +103,20 @@
   <!-- User menu modal -->
   <div id="user-modal" class="modal hidden">
     <div class="modal-box">
-      <h3>My Account</h3>
-      <form id="profile-form">
+      <div class="modal-header"><h3>My Account</h3></div>
+      <form id="profile-form" class="modal-body">
         <label>Name</label>
         <input type="text" name="name" required>
         <label>Color</label>
         <input type="color" name="color">
-        <label>New Password (leave blank to keep current)</label>
+        <label>New Password <span class="text-muted">(leave blank to keep current)</span></label>
         <input type="password" name="password" autocomplete="new-password">
-        <div class="modal-actions">
-          <button type="submit" class="btn btn-primary">Save</button>
-          <button type="button" id="logout-btn" class="btn btn-ghost">Sign Out</button>
-          <button type="button" class="btn btn-ghost modal-close">Cancel</button>
-        </div>
       </form>
+      <div class="modal-footer">
+        <button type="submit" form="profile-form" class="btn btn-primary">Save</button>
+        <button type="button" id="logout-btn" class="btn btn-ghost">Sign Out</button>
+        <button type="button" class="btn btn-ghost modal-close">Cancel</button>
+      </div>
     </div>
   </div>
 
@@ -138,5 +145,6 @@
   <script src="/js/pantry.js"></script>
   <script src="/js/links.js"></script>
   <script src="/js/ai.js"></script>
+  <script src="/js/admin.js"></script>
 </body>
 </html>

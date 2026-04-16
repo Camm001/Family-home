@@ -261,6 +261,19 @@ CREATE TABLE IF NOT EXISTS push_subscriptions (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- iCloud / CalDAV integrations
+CREATE TABLE IF NOT EXISTS user_integrations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL UNIQUE,
+  provider TEXT NOT NULL DEFAULT 'icloud',
+  username TEXT NOT NULL,
+  app_password TEXT NOT NULL,
+  calendar_url TEXT,
+  last_sync_at DATETIME,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Seed default expense categories
 INSERT OR IGNORE INTO expense_categories (id, name, color) VALUES
   (1, 'Groceries', '#22c55e'),

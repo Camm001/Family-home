@@ -140,7 +140,7 @@ const PAGE_TITLES = {
   chores: 'Chores', meals: 'Meal Planner', recipes: 'Recipes',
   photos: 'Photos', board: 'Message Board', documents: 'Documents',
   expenses: 'Expenses', watchlist: 'Watchlist', reminders: 'Reminders',
-  pantry: 'Pantry', links: 'Links'
+  pantry: 'Pantry', links: 'Links', admin: 'Admin'
 };
 
 const PAGE_RENDERERS = {}; // filled by each module
@@ -159,8 +159,14 @@ function showApp() {
   // Set user info in sidebar
   const av = document.getElementById('user-avatar');
   av.textContent = App.user.name[0].toUpperCase();
-  av.style.background = App.user.color || '#6366f1';
+  av.style.background = App.user.color || '#2383e2';
   document.getElementById('user-name-sidebar').textContent = App.user.name;
+
+  // Show admin nav item for admins
+  if (App.user.role === 'admin') document.body.classList.add('admin-visible');
+
+  // Apply saved nav order
+  applyNavOrder();
 
   App.connectWS();
   App.setupPush();
@@ -286,5 +292,73 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('logout-btn').addEventListener('click', () => App.logout());
 
+  // Reorder toggle
+  document.getElementById('reorder-toggle').addEventListener('click', () => {
+    document.body.classList.toggle('reorder-mode');
+  });
+
+  // Drag-and-drop nav reorder
+  const navList = document.getElementById('nav-list');
+  let dragSrc = null;
+
+  navList.addEventListener('dragstart', e => {
+    const item = e.target.closest('li');
+    if (!item) return;
+    dragSrc = item;
+    item.style.opacity = '.4';
+  });
+
+  navList.addEventListener('dragend', e => {
+    const item = e.target.closest('li');
+    if (item) item.style.opacity = '';
+    navList.querySelectorAll('li').forEach(li => li.querySelector('.nav-item').classList.remove('drag-over'));
+  });
+
+  navList.addEventListener('dragover', e => {
+    e.preventDefault();
+    const target = e.target.closest('li');
+    if (!target || target === dragSrc) return;
+    navList.querySelectorAll('li').forEach(li => li.querySelector('.nav-item').classList.remove('drag-over'));
+    target.querySelector('.nav-item').classList.add('drag-over');
+  });
+
+  navList.addEventListener('drop', e => {
+    e.preventDefault();
+    const target = e.target.closest('li');
+    if (!target || target === dragSrc) return;
+    const items = [...navList.children];
+    const srcIdx = items.indexOf(dragSrc);
+    const tgtIdx = items.indexOf(target);
+    if (srcIdx < tgtIdx) target.after(dragSrc);
+    else target.before(dragSrc);
+    target.querySelector('.nav-item').classList.remove('drag-over');
+    saveNavOrder();
+  });
+
+  // Enable draggable in reorder mode
+  const observer = new MutationObserver(() => {
+    const reordering = document.body.classList.contains('reorder-mode');
+    navList.querySelectorAll('li').forEach(li => {
+      li.draggable = reordering;
+    });
+  });
+  observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
   App.start();
 });
+
+/* ── Nav order helpers ────────────────────────────────────────────────────── */
+function saveNavOrder() {
+  const order = [...document.querySelectorAll('#nav-list .nav-item')].map(a => a.dataset.page);
+  localStorage.setItem('fh_nav_order', JSON.stringify(order));
+}
+
+function applyNavOrder() {
+  const saved = JSON.parse(localStorage.getItem('fh_nav_order') || 'null');
+  if (!saved) return;
+  const ul = document.getElementById('nav-list');
+  saved.forEach(page => {
+    const el = ul.querySelector(`[data-page="${page}"]`);
+    if (el) ul.appendChild(el.closest('li'));
+  });
+}

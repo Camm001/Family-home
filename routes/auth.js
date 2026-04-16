@@ -60,6 +60,28 @@ router.post('/invite', auth, (req, res) => {
   res.json({ token, expires_at: expires });
 });
 
+// List pending invites (admin only)
+router.get('/invites', auth, (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+  const db = req.app.locals.db;
+  const invites = db.prepare(`
+    SELECT i.token, i.expires_at, i.created_at, u.name as created_by_name
+    FROM invite_tokens i
+    JOIN users u ON u.id = i.created_by
+    WHERE i.used_by IS NULL AND i.expires_at > datetime('now')
+    ORDER BY i.created_at DESC
+  `).all();
+  res.json(invites);
+});
+
+// Revoke a pending invite (admin only)
+router.delete('/invites/:token', auth, (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+  const db = req.app.locals.db;
+  db.prepare('DELETE FROM invite_tokens WHERE token = ? AND used_by IS NULL').run(req.params.token);
+  res.json({ ok: true });
+});
+
 // Get current user
 router.get('/me', auth, (req, res) => {
   const db = req.app.locals.db;
