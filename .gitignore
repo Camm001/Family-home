@@ -1,0 +1,24 @@
+# Environment & secrets
+.env
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Dependencies
+node_modules/
+
+# Uploaded files
+data/photos/*
+data/documents/*
+data/receipts/*
+!data/photos/.gitkeep
+!data/documents/.gitkeep
+!data/receipts/.gitkeep
+
+# Backups
+backups/
+
+# macOS
+.DS_Store
